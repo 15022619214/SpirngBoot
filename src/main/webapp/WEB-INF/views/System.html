@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:include="Utils::headUtil(Pagetitle= '测试')"></head>
+<body ng-app="Angular" ng-controller="testController">
+    <div th:include="Utils::viewModals"></div>
+    <div th:include="Utils::nav"></div>
+
+    <table class="am-table am-table-bordered">
+        <thead>
+            <tr>
+                <td>序号</td>
+                <td>姓名</td>
+                <td>电话</td>
+                <td>地址</td>
+                <td>备注</td>
+            </tr>
+        </thead>
+        <body>
+            <tr ng-repeat="item in testinfo">
+                <td ng-bind="item.id"></td>
+                <td ng-bind="item.testname"></td>
+                <td ng-bind="item.tel"></td>
+                <td ng-bind="item.address"></td>
+                <td ng-bind="item.remark"></td>
+            </tr>
+        </body>
+    </table>
+
+</body>
+<script>
+    A.controller("testController",["$scope","$http",function ($scope,$http) {
+
+        $scope.testinfo = [];
+        $http({
+            method:"GET",
+            url:ctx + "/api/getTestinfo"
+        }).then(function (res) {
+            console.log(res.data['testinfos'])
+            $scope.testinfo = res.data['testinfos'];
+        })
+
+    }])
+</script>
+</html>

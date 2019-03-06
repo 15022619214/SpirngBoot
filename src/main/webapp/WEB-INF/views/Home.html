@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:include="Utils::headUtil(Pagetitle= '首页')"></head>
+<body ng-app="Angular" ng-controller="homeController">
+    <input type="hidden" th:value="${session?.SPRING_SECURITY_LAST_EXCEPTION?.message}" id="exception">
+    <div th:include="Utils::viewModals"></div>
+    <div th:include="Utils::nav"></div>
+    <table class="am-table am-table-bordered">
+        <thead>
+        <tr>
+            <td>序号</td>
+            <td>姓名</td>
+            <td>电话</td>
+            <td>地址</td>
+            <td>备注</td>
+        </tr>
+        </thead>
+        <body>
+        <tr ng-repeat="item in testinfoPages">
+            <td ng-bind="item.id"></td>
+            <td ng-bind="item.testname"></td>
+            <td ng-bind="item.tel"></td>
+            <td ng-bind="item.address"></td>
+            <td ng-bind="item.remark"></td>
+        </tr>
+        </body>
+    </table>
+    <ag-pages data="testinfo" paging="testinfoPages" page-size="1"></ag-pages>
+</body>
+<script>
+    if($("#exception").val() == "Bad credentials"){
+        $("#logoutModal").modal("toggle")
+    }
+    A.controller("homeController",["$scope","$http",function ($scope,$http) {
+        $scope.login = function () {
+            $("#loginModal").modal("toggle")
+        }
+
+        $scope.geinfo = function () {
+            $("#Userform").submit();
+        }
+
+        $scope.testinfo = [];
+        $http({
+            method:"GET",
+            url:ctx + "/api/getTestinfo"
+        }).then(function (res) {
+            console.log(res.data['testinfos'])
+            $scope.testinfo = res.data['testinfos'];
+        })
+    }])
+</script>
+</html>

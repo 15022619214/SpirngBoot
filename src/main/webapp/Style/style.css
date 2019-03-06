@@ -1,0 +1,10 @@
+.am-topbar-inverse{
+    background-color: #000000;
+    border-color: #0b6fa2;
+    color: #eeeeee;
+}
+
+.am-topbar-inverse .am-topbar-nav > li > a:hover:after,
+.am-topbar-inverse .am-topbar-nav > li > a:focus:after {
+    border-bottom-color: #ffffff;
+}

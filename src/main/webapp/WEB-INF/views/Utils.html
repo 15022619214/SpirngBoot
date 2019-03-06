@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="headUtil(Pagetitle)">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
+<title th:text="${Pagetitle}"></title>
+<link rel="stylesheet" th:href="@{Javascript/AmazeUI/css/amazeui.css}">
+<link rel="stylesheet" th:href="@{Javascript/AmazeUI/css/app.css}">
+<link rel="stylesheet" th:href="@{Style/style.css}">
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script th:src="@{Javascript/AmazeUI/js/amazeui.js}"></script>
+<script th:src="@{Javascript/Angularjs/angular.js}"></script>
+<script>
+        var ctx = "/Boot";
+        var A = angular.module('Angular',[]);
+        A.config(function ($httpProvider) {
+            $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
+            $httpProvider.defaults.transformRequest = function(data){
+                if (data === undefined) {
+                    return data;
+                }
+                return $.param(data);
+            }
+        }).config(function($interpolateProvider) {
+            $interpolateProvider.startSymbol('[{');
+            $interpolateProvider.endSymbol('}]');
+        }).directive("agPages",[function(){
+            return {
+                restrict: "E",
+                templateUrl: ctx+"/Directive/paging.html",
+
+                scope: {
+                    data: "=",
+                    paging: "=",
+                    pageSize: "@"
+                },
+                link: function(scope, element, attrs){
+                    scope.$watch("data", function(newValue){
+                        if(scope.data.length == 0){
+                            return;
+                        }
+                        scope.pages = Math.ceil(scope.data.length / scope.pageSize);//共有多少页
+                        scope.newPages = scope.pages > 5 ? 5 : scope.pages; //在显示页数区域，只显示五条
+                        scope.pageList = [];//要显示的所有页数数组
+                        scope.selPage = 1; //当前页数
+                        scope.paging = scope.data.slice(0, scope.pageSize);
+                        for (var i = 0; scope.newPages > i  ; i++) {
+                            scope.pageList.push(i + 1);
+                        }
+                        //设置数据源
+                        scope.setData = function () {
+                            scope.paging = scope.data.slice((scope.pageSize * (scope.selPage - 1)), (scope.selPage * scope.pageSize));//通过当前页数筛选出表格当前显示数据
+                        };
+                        //选中页数后的操作
+                        scope.selectPage = function (page) {
+                            //不能小于1以及不能大于最大
+                            if (1 > page || page > scope.pages){
+                                return;
+                            }
+                            //最多显示分页数5
+                            else if (page > 2) {
+                                //因为只显示5个页数，大于2页开始分页转换
+                                var newpageList = [];
+                                for (var i = (page - 3) ; ((page + 2) > scope.pages ? scope.pages : (page + 2)) > i  ; i++) {
+                                    newpageList.push(i + 1);
+                                }
+                                scope.pageList = newpageList;
+                            }else if (page == 1 || page==2){
+                                var newpageList = [];
+                                for (var i = 0 ; (5 > scope.pages ? scope.pages : 5) > i  ; i++) {
+                                    newpageList.push(i + 1);
+                                }
+                                scope.pageList = newpageList;
+                            }
+                            scope.selPage = page;
+                            scope.setData();
+                            scope.isActivePage(page);
+                        };
+                            //设置当前选中页样式
+                        scope.isActivePage = function (page) {
+                            return scope.selPage == page;
+                        };
+                        //上一页
+                        scope.Previous = function () {
+                            scope.selectPage(scope.selPage - 1);
+                        };
+                        //下一页
+                        scope.Next = function () {
+                            scope.selectPage(scope.selPage + 1);
+                        };
+                    });
+                 }
+            }
+        }]);
+    </script>
+</head>
+<body>
+    <div th:fragment="nav">
+        <header class="am-topbar am-topbar-inverse am-topbar-fixed-top">
+            <h1 class="am-topbar-brand">
+                <a href="#">Spring Boot</a>
+            </h1>
+            <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only" data-am-collapse="{target: '#doc-topbar-collapse'}"><span class="am-sr-only">导航切换</span> <span class="am-icon-bars"></span></button>
+            <div class="am-collapse am-topbar-collapse" id="doc-topbar-collapse">
+                <ul class="am-nav am-nav-pills am-topbar-nav">
+                    <li class="am-active"><a href="#">首页</a></li>
+                    <li><a href="#">项目</a></li>
+                    <li class="am-dropdown" data-am-dropdown>
+                        <a class="am-dropdown-toggle" data-am-dropdown-toggle href="javascript:;">
+                            下拉 <span class="am-icon-caret-down"></span>
+                        </a>
+                        <ul class="am-dropdown-content">
+                            <li class="am-dropdown-header">标题</li>
+                            <li><a href="#">1. 去月球</a></li>
+                            <li class="am-active"><a href="#">2. 去火星</a></li>
+                            <li><a href="#">3. 还是回地球</a></li>
+                            <li class="am-disabled"><a href="#">4. 下地狱</a></li>
+                            <li class="am-divider"></li>
+                            <li><a href="#">5. 桥头一回首</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="am-topbar-right" th:if="${session.Userinfo!=null}">
+                    <span th:text="${session.Userinfo.realname}"></span>
+                    <a th:href="@{/logout}"  class="am-btn am-btn-warning am-topbar-btn am-btn-sm">退出</a>
+                </div>
+                <div class="am-topbar-right" th:if="${session.SPRING_SECURITY_CONTEXT==null}">
+                    <button class="am-btn am-btn-warning am-topbar-btn am-btn-sm" ng-click="login()">登录</button>
+                </div>
+            </div>
+        </header>
+        <script type="text/javascript">
+            /*导航菜单下标切换*/
+            $(document).ready(function(){
+                $(".am-topbar ul li").each(function(){
+                    $(this).click(function(){
+                        $(".am-topbar ul li").removeClass("am-active");
+                        $(this).addClass("am-active");
+                        return false;
+                    });
+                });
+            });
+        </script>
+    </div>
+    <div th:fragment="viewModals">
+        <div class="am-modal am-modal-confirm" tabindex="-1" id="loginModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">用户登录</div>
+            <div class="am-modal-bd">
+                <form  role="form" name="form" th:action="@{/login}" action="/login" method="post" id="Userform">
+                    <div class="am-input-group">
+                        <span class="am-input-group-label"><i class="am-icon-user am-icon-fw"></i></span>
+                        <input type="text" class="am-form-field" placeholder="Username" name="username" id="username">
+                    </div>
+                    <div class="am-input-group">
+                        <span class="am-input-group-label"><i class="am-icon-lock am-icon-fw"></i></span>
+                        <input type="password" class="am-form-field" placeholder="Password" name="password" id="password">
+                    </div>
+                </form>
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn" data-am-modal-cancel>返回</span>
+                <span class="am-modal-btn" ng-click="geinfo()">登录</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="am-modal am-modal-confirm" tabindex="-1" id="logoutModal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">提示信息</div>
+            <div class="am-modal-bd">
+                用户名或密码错误，请重新输入
+            </div>
+            <div class="am-modal-footer">
+                <a th:href="@{/logout}"  class="am-modal-div">确定</a>
+            </div>
+        </div>
+    </div>
+        <style>
+            .am-modal-div{
+                display: table-cell !important;
+                padding: 0 5px;
+                height: 44px;
+                -webkit-box-sizing: border-box !important;
+                box-sizing: border-box !important;
+                font-size: 1.6rem;
+                line-height: 44px;
+                text-align: center;
+                color: #0e90d2;
+                display: block;
+                word-wrap: normal;
+                /* for IE */
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                cursor: pointer;
+                border-right: 1px solid #dedede;
+            }
+        </style>
+
+    </div>
+</body>
+</html>

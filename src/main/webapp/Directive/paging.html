@@ -1,0 +1,7 @@
+<meta charset="utf-8" >
+
+<ul class="am-pagination am-pagination-centered"  ng-if="pageList.length!=1">
+  <li class="am-disabled"  ng-click="Previous()"  ng-if="selPage!=1"><a href="#">&laquo;</a></li>
+  <li  ng-class="{'am-active':isActivePage(page),'':!isActivePage(page)}"  ng-repeat="page in pageList" ng-click="selectPage(page)"><a href="#">[{page}]</a></li>
+  <li ng-click="Next()" ng-if="selPage!=pages"><a href="#">&raquo;</a></li>
+</ul>
